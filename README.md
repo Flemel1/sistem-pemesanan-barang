@@ -12,9 +12,6 @@ Buka terminal dan jalankan script berikut
 ```sh
 https://github.com/Flemel1/sistem-pemesanan-barang.git
 ```
-```sh
-php artisan key:generate
-```
 4. Setup environment
 Buka project yang telah diclone kemudian buat file .env dan tambahkan kode berikut.
 ```sh
@@ -85,6 +82,9 @@ GOOGLE_MAPS_API_KEY="AIzaSyD5ToDx89t74vmn-jio8GD2XI003RkVK04"
 ```
 5. Inisial Databse
 Jalankan script berikut pada terminal.
+```sh
+php artisan key:generate
+```
 ```sh
 php artisan migrate
 ```
