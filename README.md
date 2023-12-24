@@ -12,6 +12,9 @@ Buka terminal dan jalankan script berikut
 ```sh
 https://github.com/Flemel1/sistem-pemesanan-barang.git
 ```
+```sh
+php artisan key:generate
+```
 4. Setup environment
 Buka project yang telah diclone kemudian buat file .env dan tambahkan kode berikut.
 ```sh
