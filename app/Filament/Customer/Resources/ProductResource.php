@@ -25,15 +25,25 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('product_id')
-                    ->label('Pilih Produk')
-                    ->options(Product::all()->pluck('product_name', 'id'))
-                    ->required()
-                    ->searchable(),
-                Forms\Components\TextInput::make('order_product_stock')
-                    ->label('Jumlah Produk Dibeli')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Repeater::make('products')
+                    ->schema([
+                        Forms\Components\Select::make('product_id')
+                            ->label('Pilih Produk')
+                            ->options(Product::all()->pluck('product_name', 'id'))
+                            ->required()
+                            ->distinct()
+                            ->searchable(),
+                        Forms\Components\TextInput::make('order_product_stock')
+                            ->label('Jumlah Produk Dibeli')
+                            ->required()
+                            ->numeric(),
+                    ])
+                    ->defaultItems(1)
+                    ->reorderable(false)
+                    ->addActionLabel('Tambah Produk')
+                    ->minItems(1)
+                    ->columns(2)
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('order_address')
                     ->label('Alamat Pengiriman')
                     ->required()
@@ -56,6 +66,9 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('product_photo')
+                    ->label('Foto')
+                    ->height(200),
                 Tables\Columns\TextColumn::make('product_name')
                     ->label('Nama Produk')
                     ->searchable(),

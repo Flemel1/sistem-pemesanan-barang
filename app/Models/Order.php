@@ -14,9 +14,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id',
         'product_name',
-        'order_product_stock',
         'order_address',
         'order_payment_method',
         'order_location_maps',
@@ -36,14 +34,6 @@ class Order extends Model
     // protected $appends = [
     //     'location',
     // ];
-
-    // public function getLocationAttribute(): array
-    // {
-    //     return [
-    //         "lat" => 110.3800343098,
-    //         "lng" => -7.7819877163002,
-    //     ];
-    // }
 
     // public function getLocationAttribute(): array
     // {
@@ -84,5 +74,10 @@ class Order extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(OrderDetail::class);
     }
 }

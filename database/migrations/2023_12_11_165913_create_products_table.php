@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('product_stock');
             $table->integer('product_price');
             $table->tinyInteger('product_discount')->default(0);
+            $table->string('product_photo');
             $table->timestamps();
             $table->softDeletes();
         });

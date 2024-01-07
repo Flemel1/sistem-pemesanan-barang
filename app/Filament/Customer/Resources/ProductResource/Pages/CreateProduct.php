@@ -4,6 +4,7 @@ namespace App\Filament\Customer\Resources\ProductResource\Pages;
 
 use App\Filament\Customer\Resources\ProductResource;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use Exception;
 use Filament\Notifications\Notification;
@@ -25,32 +26,44 @@ class CreateProduct extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        $record = null;
+        $order = null;
         try {
             DB::beginTransaction();
-            $product = Product::find($data['product_id']);
-            $product_stock = $product->product_stock;
-            $product_stock_purchase = $data['order_product_stock'];
-            if ($product_stock < $product_stock_purchase) {
-                DB::rollBack();
-                $this->getCreatedNotification('Pesanan gagal dibuat', 'Stok yang ingin dibeli tidak mencukupi', false)->send();
-                $this->halt();
+            $products = $data['products'];
+            foreach ($products as $product) {
+                $currentProduct = Product::find($product['product_id']);
+                $product_stock = $currentProduct->product_stock;
+                $product_stock_purchase = $product['order_product_stock'];
+                if ($product_stock < $product_stock_purchase) {
+                    DB::rollBack();
+                    $this->getCreatedNotification('Pesanan gagal dibuat', 'Stok yang ingin dibeli tidak mencukupi', false)->send();
+                    $this->halt();
+                }
+                $currentProduct->product_stock = $product_stock - $product_stock_purchase;
+                $currentProduct->save();
             }
-            $product->product_stock = $product_stock - $product_stock_purchase;
-            $product->save();
             $location = new Point($data['location']['lat'], $data['location']['lng']);
             $data['location'] = $location;
-            $record = new Order($data);
-            $record->save();
+            $order = new Order($data);
+            $order->save();
+            $orderId = $order->id;
+            foreach ($products as $product) {
+                $input = [
+                    'order_id' => $orderId,
+                    'product_id' => $product['product_id'],
+                    'order_product_stock' => $product['order_product_stock']
+                ];
+                $orderDetail = new OrderDetail($input);
+                $orderDetail->save();
+            }
             DB::commit();
-            return $record;
+            return $order;
         } catch (Exception $ex) {
             DB::rollBack();
             dd($ex);
             $this->halt();
-            
         }
-        
+
         //return $record;
     }
 
@@ -71,8 +84,7 @@ class CreateProduct extends CreateRecord
         //     dd('hello');
         //     $this->halt();
         // }
-
-        $product = Product::find($data['product_id']);
+        $data['order_charge'] = 0;
         $distance = GeoFacade::setPoint([-7.773580, 110.380803])
             ->setOptions(['units' => ['km']])
             ->setPoint([$data['location']['lat'], $data['location']['lng']])
@@ -83,15 +95,18 @@ class CreateProduct extends CreateRecord
         } else {
             $data['order_deliver_fee'] = 1500;
         }
-        $discount = $product->product_discount;
-        if ($discount == 0) {
-            $data['order_charge'] = $product->product_price * $data['order_product_stock'];
-            $data['order_charge'] += $data['order_deliver_fee'];
-        } else {
-            $data['order_charge'] = ($product->product_price - (($discount / 100) * $product->product_price)) * $data['order_product_stock'];
-            $data['order_charge'] += $data['order_deliver_fee'];
+        $products = $data['products'];
+        foreach ($products as $product) {
+            $currentProduct = Product::find($product['product_id']);
+            $discount = $currentProduct->product_discount;
+            if ($discount == 0) {
+                $data['order_charge'] += $currentProduct->product_price * $product['order_product_stock'];
+                
+            } else {
+                $data['order_charge'] += ($currentProduct->product_price - (($discount / 100) * $currentProduct->product_price)) * $data['order_product_stock'];
+            }
         }
-
+        $data['order_charge'] += $data['order_deliver_fee'];
         return $data;
     }
 

@@ -90,8 +90,8 @@ Jalankan script berikut pada terminal.
 ```sh
 php artisan serve
 ```
-Buka browser dan masukkan alamat http://127.0.0.1:8000
 7. Daftar akun
+Buka browser dan masukkan alamat http://127.0.0.1:8000
 Halaman admin [Halaman Admin](http://127.0.0.1:8000/admin)
 Halaman konsumen [Halaman Konsumen](http://127.0.0.1:8000)
 

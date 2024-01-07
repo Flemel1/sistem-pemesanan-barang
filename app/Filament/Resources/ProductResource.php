@@ -30,6 +30,12 @@ class ProductResource extends Resource
                 Forms\Components\Textarea::make('product_description')->label('Deskripsi Produk')->rows(10)
                     ->columnSpanFull()
                     ->required(),
+                Forms\Components\FileUpload::make('product_photo')
+                    ->label('Foto Produk')
+                    ->directory('products')
+                    ->visibility('private')
+                    ->image()
+                    ->required(),
             ]);
     }
 
@@ -38,6 +44,9 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\ImageColumn::make('product_photo')
+                    ->label('Foto')
+                    ->height(200),
                 Tables\Columns\TextColumn::make('product_name')->label('Nama Produk'),
                 Tables\Columns\TextColumn::make('product_price')->label('Harga Produk'),
             ])
@@ -46,7 +55,7 @@ class ProductResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -71,7 +80,8 @@ class ProductResource extends Resource
         ];
     }
 
-    public function viewAny(): bool {
+    public function viewAny(): bool
+    {
         return false;
     }
 }

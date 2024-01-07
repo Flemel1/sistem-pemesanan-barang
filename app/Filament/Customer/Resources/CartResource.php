@@ -6,6 +6,7 @@ use App\Filament\Customer\Resources\CartResource\Pages;
 use App\Filament\Customer\Resources\CartResource\RelationManagers;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 use Exception;
@@ -115,8 +116,16 @@ class CartResource extends Resource
                             $product->save();
                             $location = new Point($data['location']['lat'], $data['location']['lng']);
                             $data['location'] = $location;
-                            $record = new Order($data);
-                            $record->save();
+                            $order = new Order($data);
+                            $order->save();
+                            $orderId = $order->id;
+                            $input = [
+                                'order_id' => $orderId,
+                                'product_id' => $data['product_id'],
+                                'order_product_stock' => $data['order_product_stock']
+                            ];
+                            $orderDetail = new OrderDetail($input);
+                            $orderDetail->save();
                             $cart->delete();
                             DB::commit();
                             self::getCreatedNotification()->send();

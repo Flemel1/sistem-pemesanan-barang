@@ -33,8 +33,12 @@ class HistoryResource extends Resource
     {
         return $infolist
             ->schema([
-                InfoLists\Components\TextEntry::make('product.product_name')->label('Nama Produk'),
-                InfoLists\Components\TextEntry::make('order_product_stock')->label('Jumlah (Pcs)'),
+                InfoLists\Components\TextEntry::make('details.product.product_name')
+                    ->label('Nama Produk')
+                    ->listWithLineBreaks(),
+                InfoLists\Components\TextEntry::make('details.order_product_stock')
+                    ->label('Jumlah (Pcs)')
+                    ->listWithLineBreaks(),
                 InfoLists\Components\TextEntry::make('order_date')->label('Tanggal Pesan')->date(),
                 InfoLists\Components\TextEntry::make('order_payment_method')->label('Metode Pembayaran'),
                 InfoLists\Components\TextEntry::make('customer.customer_name')->label('Nama Pemesan'),
@@ -60,9 +64,9 @@ class HistoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('ID Pesanan'),
-                Tables\Columns\TextColumn::make('product.product_name')->label('Nama Produk'),
-                Tables\Columns\TextColumn::make('order_product_stock')->label('Jumlah (Pcs)')
-                    ->numeric(),
+                // Tables\Columns\TextColumn::make('product.product_name')->label('Nama Produk'),
+                // Tables\Columns\TextColumn::make('order_product_stock')->label('Jumlah (Pcs)')
+                //     ->numeric(),
                 Tables\Columns\TextColumn::make('order_date')->label('Tanggal Pesan'),
                 Tables\Columns\TextColumn::make('order_status')
                     ->label('Status Pesanan')

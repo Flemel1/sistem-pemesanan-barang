@@ -22,15 +22,25 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('product_id')
-                    ->label('Pilih Produk')
-                    ->options(Product::all()->pluck('product_name', 'id'))
-                    ->required()
-                    ->disabled(),
-                Forms\Components\TextInput::make('order_product_stock')
-                    ->label('Jumlah Produk Dibeli')
-                    ->required()
-                    ->numeric()
+                Forms\Components\Repeater::make('products')
+                    ->schema([
+                        Forms\Components\Select::make('product_id')
+                            ->label('Pilih Produk')
+                            ->options(Product::all()->pluck('product_name', 'id'))
+                            ->required()
+                            ->distinct()
+                            ->searchable(),
+                        Forms\Components\TextInput::make('order_product_stock')
+                            ->label('Jumlah Produk Dibeli')
+                            ->required()
+                            ->numeric(),
+                    ])
+                    ->defaultItems(1)
+                    ->reorderable(false)
+                    ->addActionLabel('Tambah Produk')
+                    ->minItems(1)
+                    ->columns(2)
+                    ->columnSpanFull()
                     ->disabled(),
                 Forms\Components\Textarea::make('order_address')
                     ->label('Alamat Pengiriman')
@@ -57,13 +67,13 @@ class OrderResource extends Resource
                     ->directory('payments')
                     ->visibility('private')
                     ->disabled(),
-                // Map::make('location')
-                //     ->clickable()
-                //     ->defaultZoom(15)
-                //     ->geolocate()
-                //     ->geolocateLabel('Lokasi Saat Ini')
-                //     ->disabled()
-                //     ->columnSpanFull()
+                Map::make('location')
+                    ->clickable()
+                    ->defaultZoom(15)
+                    ->geolocate()
+                    ->geolocateLabel('Lokasi Saat Ini')
+                    ->disabled()
+                    ->columnSpanFull()
             ]);
     }
 
