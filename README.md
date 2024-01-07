@@ -83,6 +83,9 @@ GOOGLE_MAPS_API_KEY="AIzaSyD5ToDx89t74vmn-jio8GD2XI003RkVK04"
 5. Inisial Databse
 Jalankan script berikut pada terminal.
 ```sh
+php artisan key:generate
+```
+```sh
 php artisan migrate
 ```
 6. Jalankan project
