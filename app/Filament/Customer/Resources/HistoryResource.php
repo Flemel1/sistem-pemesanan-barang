@@ -4,7 +4,9 @@ namespace App\Filament\Customer\Resources;
 
 use App\Filament\Customer\Resources\HistoryResource\Pages;
 use App\Filament\Customer\Resources\HistoryResource\RelationManagers;
+use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Review;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -87,35 +89,66 @@ class HistoryResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Action::make('rating')
                     ->label('Beri Rating')
+                    ->fillForm(function (Order $order): array {
+                        $products = [];
+                        foreach ($order->details as $orderDetails) {
+                            $product = [
+                                'product_id' => $orderDetails->product_id
+                            ];
+                            array_push($products, $product);
+                        }
+                        $data['details'] = $products;
+                        return $data;
+                    })
                     ->form([
-                        Forms\Components\Select::make('review_rating')
-                            ->label('Rating')
-                            ->options([
-                                1 => 1,
-                                2 => 2,
-                                3 => 3,
-                                4 => 4,
-                                5 => 5
+                        Forms\Components\Repeater::make('details')
+                            ->schema([
+                                Forms\Components\Select::make('product_id')
+                                    ->label('Pilih Produk')
+                                    ->options(Product::all()->pluck('product_name', 'id'))
+                                    ->distinct()
+                                    ->searchable()
+                                    ->required()
+                                    ->disabled()
+                                    ->dehydrated(),
+                                Forms\Components\Select::make('review_rating')
+                                    ->label('Rating')
+                                    ->options([
+                                        1 => 1,
+                                        2 => 2,
+                                        3 => 3,
+                                        4 => 4,
+                                        5 => 5
+                                    ])
+                                    ->required(),
+                                Forms\Components\Textarea::make('review_text')
+                                    ->label('Tulis Ulasan Anda')
+                                    ->rows(5)
                             ])
-                            ->required(),
-                        Forms\Components\Textarea::make('review_text')
-                            ->label('Tulis Ulasan Anda')
-                            ->rows(5)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->addable(false)
                     ])
                     ->action(function (array $data, Order $order): void {
-                        $data['customer_id'] = auth()->id();
-                        $data['product_id'] = $order->product->id;
-                        $record = new Review($data);
-                        $record->save();
-                        $order->review_id = $record->id;
+                        $customer = Customer::where('user_id', auth()->id())->first();
+                        $products = $data['details'];
+                        foreach ($products as $product) {
+                            $input['customer_id'] = $customer->id;
+                            $input['product_id'] = $product['product_id'];
+                            $input['review_rating'] = $product['review_rating'];
+                            $input['review_text'] = $product['review_text'];
+                            $record = new Review($input);
+                            $record->save();
+                        }
+                        $order->is_reviewed = true;
                         $order->save();
                     })
                     ->hidden(function (Order $record): bool {
                         if ($record->order_status == 'wait') {
                             return true;
-                        } else if ($record->order_status == 'accept' && $record->review_id == null) {
+                        } else if ($record->order_status == 'accept' && $record->is_reviewed == false) {
                             return false;
-                        } else if ($record->order_status == 'accept' && $record->review_id != null) {
+                        } else if ($record->order_status == 'accept' && $record->is_reviewed == true) {
                             return true;
                         } else {
                             return true;
@@ -173,6 +206,7 @@ class HistoryResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('customer_id', auth()->id())->withoutGlobalScopes();
+        $customer = Customer::where('user_id', auth()->id())->first();
+        return parent::getEloquentQuery()->where('customer_id', $customer->id)->withoutGlobalScopes();
     }
 }

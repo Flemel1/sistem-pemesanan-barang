@@ -3,6 +3,7 @@
 namespace App\Filament\Customer\Resources\ProductResource\Pages;
 
 use App\Filament\Customer\Resources\ProductResource;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -60,7 +61,7 @@ class CreateProduct extends CreateRecord
             return $order;
         } catch (Exception $ex) {
             DB::rollBack();
-            dd($ex);
+            // dd($ex);
             $this->halt();
         }
 
@@ -89,7 +90,8 @@ class CreateProduct extends CreateRecord
             ->setOptions(['units' => ['km']])
             ->setPoint([$data['location']['lat'], $data['location']['lng']])
             ->getDistance()['1-2']['km'];
-        $data['customer_id'] = auth()->id();
+        $customer = Customer::where('user_id', auth()->id())->first();
+        $data['customer_id'] = $customer->id;
         if ($distance > 1) {
             $data['order_deliver_fee'] = 1500 * $distance;
         } else {

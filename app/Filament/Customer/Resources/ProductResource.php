@@ -4,6 +4,7 @@ namespace App\Filament\Customer\Resources;
 
 use App\Filament\Customer\Resources\ProductResource\Pages;
 use App\Models\Cart;
+use App\Models\Customer;
 use App\Models\Product;
 use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 use Filament\Forms;
@@ -89,7 +90,8 @@ class ProductResource extends Resource
                             ->numeric(),
                     ])
                     ->action(function (array $data, Product $product): void {
-                        $data['customer_id'] = auth()->id();
+                        $customer = Customer::where('user_id', '=', auth()->id())->first();
+                        $data['customer_id'] = $customer->id;
                         $data['product_id'] = $product->id;
                         $record = new Cart($data);
                         $record->save();

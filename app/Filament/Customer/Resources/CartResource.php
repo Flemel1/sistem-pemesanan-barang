@@ -5,6 +5,7 @@ namespace App\Filament\Customer\Resources;
 use App\Filament\Customer\Resources\CartResource\Pages;
 use App\Filament\Customer\Resources\CartResource\RelationManagers;
 use App\Models\Cart;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -89,7 +90,8 @@ class CartResource extends Resource
                         try {
                             DB::beginTransaction();
                             $product = Product::find($data['product_id']);
-                            $data['customer_id'] = auth()->id();
+                            $customer = Customer::where('user_id', auth()->id())->first();
+                            $data['customer_id'] = $customer->id;
                             $distance = GeoFacade::setPoint([-7.773580, 110.380803])
                                 ->setOptions(['units' => ['km']])
                                 ->setPoint([$data['location']['lat'], $data['location']['lng']])
@@ -162,7 +164,8 @@ class CartResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('customer_id', auth()->id())->withoutGlobalScopes();
+        $customer = Customer::where('user_id', '=', auth()->id())->first();
+        return parent::getEloquentQuery()->where('customer_id', $customer->id)->withoutGlobalScopes();
     }
 
     public static function getCreatedNotificationTitle(?string $title = 'Pesanan berhasil dibuat'): ?string

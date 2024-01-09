@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('order_status', ['wait', 'reject', 'accept'])->default('wait');
             $table->string('order_proof_payment')->nullable();
             $table->foreignId('customer_id')->constrained(table: 'customers', indexName: 'customer_order_id');
-            $table->foreignId('review_id')->nullable()->constrained(table: 'reviews', indexName: 'review_order_id')->onUpdate('cascade')->onDelete('set null');
+            $table->boolean('is_reviewed')->default(false);
             $table->integer('order_charge');
             $table->integer('order_deliver_fee');
             $table->point('location');

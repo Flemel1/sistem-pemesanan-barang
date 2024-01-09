@@ -23,6 +23,7 @@ class Order extends Model
         'order_charge',
         'order_deliver_fee',
         'order_proof_payment',
+        'is_reviewed',
         'location',
     ];
 
@@ -69,11 +70,6 @@ class Order extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
-    }
-
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
     }
 
     public function details(): HasMany
