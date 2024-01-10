@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\Setting;
 use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 use Exception;
 use Filament\Forms;
@@ -92,14 +93,15 @@ class CartResource extends Resource
                             $product = Product::find($data['product_id']);
                             $customer = Customer::where('user_id', auth()->id())->first();
                             $data['customer_id'] = $customer->id;
-                            $distance = GeoFacade::setPoint([-7.773580, 110.380803])
+                            $setting = Setting::find(1)->first();
+                            $distance = GeoFacade::setPoint([$setting->location->latitude, $setting->location->longitude])
                                 ->setOptions(['units' => ['km']])
                                 ->setPoint([$data['location']['lat'], $data['location']['lng']])
                                 ->getDistance()['1-2']['km'];
                             if ($distance > 1) {
-                                $data['order_deliver_fee'] = 1500 * $distance;
+                                $data['order_deliver_fee'] = $setting->order_deliver_fee * $distance;
                             } else {
-                                $data['order_deliver_fee'] = 1500;
+                                $data['order_deliver_fee'] = $setting->order_deliver_fee;
                             }
                             $discount = $product->product_discount;
                             if ($discount == 0) {

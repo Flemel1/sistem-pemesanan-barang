@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\Setting;
 use Exception;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -86,16 +87,17 @@ class CreateProduct extends CreateRecord
         //     $this->halt();
         // }
         $data['order_charge'] = 0;
-        $distance = GeoFacade::setPoint([-7.773580, 110.380803])
+        $setting = Setting::find(1)->first();
+        $distance = GeoFacade::setPoint([$setting->location->latitude, $setting->location->longitude])
             ->setOptions(['units' => ['km']])
             ->setPoint([$data['location']['lat'], $data['location']['lng']])
             ->getDistance()['1-2']['km'];
         $customer = Customer::where('user_id', auth()->id())->first();
         $data['customer_id'] = $customer->id;
         if ($distance > 1) {
-            $data['order_deliver_fee'] = 1500 * $distance;
+            $data['order_deliver_fee'] = $setting->order_deliver_fee * $distance;
         } else {
-            $data['order_deliver_fee'] = 1500;
+            $data['order_deliver_fee'] = $setting->order_deliver_fee;
         }
         $products = $data['products'];
         foreach ($products as $product) {
