@@ -81,7 +81,7 @@ class ProductResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Action::make('save-to-chart')
+                Action::make('save-to-cart')
                     ->label('Keranjang')
                     ->form([
                         Forms\Components\TextInput::make('cart_product_stock')
