@@ -24,6 +24,7 @@ class Settings extends Page
 
     protected static string $view = 'filament.pages.settings';
 
+    protected static ?string $navigationLabel = 'Pengaturan';
 
     public ?array $data = [];
 
@@ -49,7 +50,7 @@ class Settings extends Page
                     ->defaultZoom(15)
                     ->required(),
                 TextInput::make('order_deliver_fee')
-                    ->label('Biaya Ongkir')
+                    ->label('Biaya Ongkir (Per KM)')
                     ->required()
                     ->numeric(),
             ])

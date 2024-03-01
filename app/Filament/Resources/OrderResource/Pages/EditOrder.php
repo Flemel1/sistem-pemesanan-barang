@@ -4,8 +4,12 @@ namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Models\OrderDetail;
+use App\Models\OrderVerify;
+use Exception;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EditOrder extends EditRecord
 {
@@ -24,12 +28,38 @@ class EditOrder extends EditRecord
         }
 
         $data['products'] = $products;
-        $data['location'] =[
+        $data['location'] = [
             'lng' => $data['location']['coordinates'][0],
             'lat' =>  $data['location']['coordinates'][1]
         ];
 
         return $data;
+    }
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        $orderStatus = $data['order_status'];
+        $orderId = $record->id;
+        try {
+            $orderVerify = OrderVerify::findOrFail($orderId);
+            if ($orderStatus === 'accept') {
+                $orderVerify->shipment_status = 'proses';
+                $orderVerify->save();
+            } else {
+                $orderVerify->delete();
+            }
+            $record->order_status = $orderStatus;
+            $record->save();
+        } catch (ModelNotFoundException $ex) {
+            if ($orderStatus === 'accept') {
+                OrderVerify::create([
+                    'order_id' => $orderId
+                ]);
+            }
+            $record->order_status = $orderStatus;
+            $record->save();
+        }
+        return $record;
     }
 
     protected function getHeaderActions(): array

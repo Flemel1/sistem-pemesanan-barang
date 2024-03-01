@@ -24,5 +24,20 @@ class DatabaseSeeder extends Seeder
             'order_deliver_fee' => 4500,
             'location' => new Point(-7.7871936589657, 110.35144329071)
         ]);
+        \App\Models\Category::create([
+            'category_name' => 'beras',
+        ]);
+        \App\Models\Category::create([
+            'category_name' => 'telur',
+        ]);
+        \App\Models\Category::create([
+            'category_name' => 'minyak',
+        ]);
+        \App\Models\Category::create([
+            'category_name' => 'minuman',
+        ]);
+        \App\Models\Category::create([
+            'category_name' => 'snack',
+        ]);
     }
 }

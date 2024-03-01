@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -19,6 +20,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'Produk';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -26,7 +29,19 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('product_name')->label('Nama Produk')->required(),
                 Forms\Components\TextInput::make('product_stock')->label('Stok Produk')->numeric()->required(),
                 Forms\Components\TextInput::make('product_price')->label('Harga Produk')->numeric()->required(),
-                Forms\Components\TextInput::make('product_discount')->label('Diskon Produk')->numeric()->required(),
+                Forms\Components\TextInput::make('product_discount')->label('Diskon Produk (%)')->numeric()->required(),
+                Forms\Components\Select::make('category_id')
+                    ->label('Kategori')
+                    ->options(Category::all()->pluck('category_name', 'id'))
+                    ->required(),
+                Forms\Components\Select::make('product_unit')
+                    ->label('Satuan')
+                    ->options([
+                        'pcs' => 'Pcs',
+                        'renteng' => 'Renteng',
+                        'karung' => 'Karung'
+                    ])
+                    ->required(),
                 Forms\Components\Textarea::make('product_description')->label('Deskripsi Produk')->rows(10)
                     ->columnSpanFull()
                     ->required(),

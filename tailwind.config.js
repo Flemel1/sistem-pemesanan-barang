@@ -4,8 +4,8 @@ export default {
     presets: [preset],
     content: [
         './app/Filament/**/*.php',
-        './resources/views/filament/**/*.blade.php',
-        './resources/views/liveware/**/*.blade.php',
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
         './vendor/filament/**/*.blade.php',
     ],
 }
