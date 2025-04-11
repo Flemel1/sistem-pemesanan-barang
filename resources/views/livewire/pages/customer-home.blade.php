@@ -28,7 +28,7 @@
 
         @foreach ($products as $product)
             <a href="{{ route('customer.products.detail', ['product' => $product->id]) }}">
-                <div @class(['h-[250px] flex flex-col shadow-md rounded-lg'])>
+                <div @class(['h-[350px] flex flex-col shadow-md rounded-lg'])>
                     <img @class(['w-full h-1/2 rounded-t-lg']) src="/storage/{{ $product->product_photo }}" alt="Produk">
                     <div @class(['p-2 flex flex-col gap-1'])>
                         <p class="font-bold line-clamp-2 text-base">{{ $product->product_name }}

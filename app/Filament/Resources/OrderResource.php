@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -75,6 +76,7 @@ class OrderResource extends Resource
                     ->geolocate()
                     ->geolocateLabel('Lokasi Saat Ini')
                     ->disabled()
+                    ->clickable(clickable: false)
                     ->columnSpanFull()
             ]);
     }
@@ -94,18 +96,25 @@ class OrderResource extends Resource
                         if ($state == 'wait') {
                             return 'Menunggu Proses Verifikasi Pesanan';
                         } else if ($state == 'accept') {
-                            return 'Pesanan Diterima dan Dalam Proses Pengiriman';
+                            return 'Pesanan Diterima';
                         } else {
                             return 'Pesanan Dibatalkan';
                         }
                     }),
-                Tables\Columns\TextColumn::make('order_date')->label('Tanggal Pesan'),
+                Tables\Columns\TextColumn::make('order_date')->label('Tanggal Pesan')->date(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(function(Order $record) {
+                        if ($record->order_status == 'accept') {
+                            return true;
+                        }
+
+                        return false;
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -128,5 +137,10 @@ class OrderResource extends Resource
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderBy('created_at', 'desc');
     }
 }

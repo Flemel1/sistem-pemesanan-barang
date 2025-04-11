@@ -21,13 +21,17 @@ class EditOrderVerify extends EditRecord
         ];
     }
 
-    protected function mutateFormDataBeforeFill(array $data): array
+    protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // $order = OrderVerify::find($data['id'])->with(['order'])->get()->first();
-        // $data['order']['location'] =[
-        //     'lng' => $order->order->location->longitude,
-        //     'lat' =>  $order->order->location->latitude,
-        // ];
-        return $data;
+        $shipmentStatus = $data['shipment_status'];
+        $orderId = $record->id;
+        if ($shipmentStatus === 'kirim') {
+            $record->finished_at = now();
+            $record->update($data);
+        } else {
+            $record->finished_at = null;
+            $record->update($data);
+        }
+        return $record;
     }
 }

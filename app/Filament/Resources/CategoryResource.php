@@ -27,7 +27,7 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('category_name')->label('Nama Kategori')->required()
+                TextInput::make('category_name')->label('Nama Kategori')->required(),
             ]);
     }
 

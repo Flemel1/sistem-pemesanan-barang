@@ -5,12 +5,14 @@ namespace App\Livewire\Components;
 use App\Models\Cart;
 use App\Models\Customer;
 use App\Models\Product;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\ActionSize;
 use Livewire\Component;
 
@@ -33,12 +35,41 @@ class CartButton extends Component implements HasForms, HasActions
                     ->numeric(),
             ])
             ->action(function (array $data): void {
-                $customer = Customer::where('user_id', '=', auth()->id())->first();
-                $data['customer_id'] = $customer->id;
-                $data['product_id'] = $this->product->id;
-                $record = new Cart($data);
-                $record->save();
+                try {
+                    $customer = Customer::where('user_id', '=', auth()->id())->first();
+
+                    $cart_items = Cart::where('customer_id', $customer->id)->where('product_id', $this->product->id)->get();
+                    if (sizeof($cart_items) == 0) {
+                        $data['customer_id'] = $customer->id;
+                        $data['product_id'] = $this->product->id;
+                        $record = new Cart($data);
+                        $record->save();
+                    } else {
+                        $cart_item = $cart_items->first();
+                        $cart_item->cart_product_stock += $data['cart_product_stock'];
+                        $cart_item->save();
+                    }
+                    $this->createNotification();
+                } catch (Exception $ex) {
+                    $this->createNotification(false);
+                }
+                
             });
+    }
+
+    private function createNotification(bool $isSuccess = true)
+    {
+        if ($isSuccess) {
+            Notification::make()
+                ->title('Disimpan Dikeranjang')
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Gagal Menyimpan Dikeranjang')
+                ->danger()
+                ->send();
+        }
     }
 
     public function render()

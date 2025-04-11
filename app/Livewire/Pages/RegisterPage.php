@@ -77,7 +77,7 @@ class RegisterPage extends SimplePage
 
         session()->regenerate();
 
-        return redirect()->intended('customer.index');
+        return redirect()->intended();
     }
 
     /**

@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderVerifyResource\Pages;
 use App\Models\OrderVerify;
 use App\Models\Product;
-use Cheesegrits\FilamentGoogleMaps\Fields\Map;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -16,7 +15,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderVerifyResource extends Resource
 {
@@ -95,7 +96,13 @@ class OrderVerifyResource extends Resource
                         'proses' => 'Pesanan Diproses',
                         'kemas' => 'Pesanan Dikemas',
                         'kirim' => 'Pesanan Dikirim'
-                    ]),
+                    ])
+                    ->disabled(function ($record) {
+                        if ($record->shipment_status == 'kirim') {
+                            return true;
+                        }
+                        return false;
+                    })
             ]);
     }
 
@@ -120,10 +127,21 @@ class OrderVerifyResource extends Resource
                 TextColumn::make('order.order_date')->label('Tanggal Pesan'),
             ])
             ->filters([
-                //
+                SelectFilter::make('shipment_status')
+                    ->options([
+                        'proses' => 'Proses',
+                        'kemas' => 'Kemas',
+                        'kirim' => 'Kirim',
+                    ])
             ])
             ->actions([
                 EditAction::make('edit-order-verify')
+                    ->disabled(function (OrderVerify $record) {
+                        if ($record->shipment_status == 'kirim') {
+                            return true;
+                        }
+                        return false;
+                    }),
             ]);
     }
 
@@ -133,6 +151,11 @@ class OrderVerifyResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderBy('created_at', 'desc');
     }
 
     public static function getPages(): array

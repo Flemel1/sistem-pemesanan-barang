@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReportGenerator;
 use App\Livewire\Pages\Carts\ListCarts;
 use App\Livewire\Pages\CustomerHome;
 use App\Livewire\Pages\LoginPage;
@@ -30,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
         auth()->logout();
         return redirect('login');
     })->name('logout');
+    Route::get('generate-report', [ReportGenerator::class, 'index'])->name('generate-report');
+    Route::get('generate-report-verify', [ReportGenerator::class, 'report_verify'])->name('generate-report-verify');
 });
 Route::get('login', LoginPage::class)->name('login');
 Route::get('register', RegisterPage::class)->name('register');
+Route::view('report-test','reports.order-verify-report');

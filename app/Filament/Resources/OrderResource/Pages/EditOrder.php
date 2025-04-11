@@ -49,7 +49,7 @@ class EditOrder extends EditRecord
                 $orderVerify->delete();
             }
             $record->order_status = $orderStatus;
-            $record->save();
+            $record->update($data);
         } catch (ModelNotFoundException $ex) {
             if ($orderStatus === 'accept') {
                 OrderVerify::create([
@@ -57,7 +57,7 @@ class EditOrder extends EditRecord
                 ]);
             }
             $record->order_status = $orderStatus;
-            $record->save();
+            $record->update($data);
         }
         return $record;
     }

@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
+use Exception;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -29,8 +31,9 @@ class ListOrders extends Component implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
+        $customer = Customer::where('user_id', auth()->id())->first();
         return $table
-            ->query(Order::query())
+            ->query(Order::query()->where('customer_id', $customer->id)->orderBy('created_at', 'desc'))
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('ID Pesanan'),
                 Tables\Columns\TextColumn::make('order_date')->label('Tanggal Pesan'),
@@ -141,8 +144,13 @@ class ListOrders extends Component implements HasForms, HasTable
                             ->required()
                     ])
                     ->action(function (array $data, Order $order): void {
-                        $order->order_proof_payment = $data['order_proof_payment'];
-                        $order->save();
+                        try {
+                            $order->order_proof_payment = $data['order_proof_payment'];
+                            $order->save();
+                            $this->createNotification();
+                        } catch (Exception $ex) {
+                            $this->createNotification(false);
+                        }
                     })
                     ->hidden(function (Order $record): bool {
                         if ($record->order_payment_method == 'cod') {
@@ -164,9 +172,9 @@ class ListOrders extends Component implements HasForms, HasTable
                         $order->delete();
                     })
                     ->hidden(function (Order $order): bool {
-                        if ($order->order_status === 'wait' && $order->order_payment_method === 'transfer' && $order->is_reviewed == false) {
-                            return false;
-                        } else if ($order->order_status === 'wait' && $order->order_payment_method === 'cod' && $order->is_reviewed == false) {
+                        if ($order->order_payment_method === 'transfer' && $order->order_proof_payment != null) {
+                            return true;
+                        } else if ($order->order_status === 'wait' && $order->order_payment_method === 'transfer' && $order->is_reviewed == false) {
                             return false;
                         } else {
                             return true;
@@ -180,10 +188,19 @@ class ListOrders extends Component implements HasForms, HasTable
             ]);
     }
 
-    public static function getEloquentQuery(): Builder
+    private function createNotification(bool $isSuccess = true)
     {
-        $customer = Customer::where('user_id', auth()->id())->first();
-        return parent::getEloquentQuery()->where('customer_id', $customer->id)->withoutGlobalScopes();
+        if ($isSuccess) {
+            Notification::make()
+                ->title('Pesanan Telah Dibuat')
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Pesanan Gagal Dibuat')
+                ->danger()
+                ->send();
+        }
     }
 
     public function render(): View

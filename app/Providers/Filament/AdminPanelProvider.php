@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\AdminResource\Widgets\AverageFinishOrderChart;
+use App\Filament\Resources\AdminResource\Widgets\FinishProductChart;
+use App\Filament\Resources\AdminResource\Widgets\StatsOverview;
 use App\Filament\Resources\OrderResource\Widgets\RevenuesChart;
 use App\Filament\Resources\OrderResource\Widgets\StocksChart;
 use Filament\Http\Middleware\Authenticate;
@@ -42,8 +45,11 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                StatsOverview::class,
+                FinishProductChart::class,
+                // AverageFinishOrderChart::class,
                 RevenuesChart::class,
-                StocksChart::class
+                // StocksChart::class
             ])
             ->middleware([
                 EncryptCookies::class,
